@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,35 +22,54 @@ import org.lwjgl.glfw.GLFW;
 
 public final class PastaVisualClient implements ClientModInitializer {
     private static KeyMapping openMenu;
+    private static KeyMapping toggleFloating;
 
     @Override
     public void onInitializeClient() {
         VisualSettings.load();
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("pasta_visual", "controls"));
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.pasta_visual.open",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_RIGHT_SHIFT,
-                category
-        ));
+                "key.pasta_visual.open", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, category));
+        toggleFloating = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.pasta_visual.floating", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, category));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openMenu.consumeClick()) {
-                client.setScreen(new PastaVisualScreen(client.screen));
+            while (openMenu.consumeClick()) client.setScreen(new PastaVisualScreen(client.screen));
+            while (toggleFloating.consumeClick()) {
+                VisualSettings.showFloatingPanel = !VisualSettings.showFloatingPanel;
+                VisualSettings.save();
             }
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> VisualSettings.save());
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("pasta_visual", "watermark"), (graphics, deltaTracker) -> {
             Minecraft client = Minecraft.getInstance();
-            if (client.player == null || !VisualSettings.showHud) return;
-            graphics.fill(8, 8, 126, VisualSettings.showCoordinates ? 39 : 27, 0xB8101420);
-            graphics.fill(8, 8, 10, VisualSettings.showCoordinates ? 39 : 27, 0xFFFF8A45);
-            graphics.drawString(client.font, "PASTA VISUAL", 16, 13, 0xFFFFB477, false);
-            if (VisualSettings.showCoordinates) {
-                var pos = client.player.blockPosition();
-                graphics.drawString(client.font, "XYZ  " + pos.getX() + "  " + pos.getY() + "  " + pos.getZ(),
-                        16, 26, 0xFFD0D6E4, false);
+            if (client.player == null) return;
+
+            if (VisualSettings.showHud) {
+                int height = VisualSettings.showCoordinates ? 39 : 27;
+                graphics.fill(8, 8, 142, height, 0xB8101420);
+                graphics.fill(8, 8, 10, height, 0xFFFF9857);
+                graphics.drawString(client.font, "PASTA VISUAL", 16, 13, 0xFFFFB477, false);
+                if (VisualSettings.showCoordinates) {
+                    var pos = client.player.blockPosition();
+                    graphics.drawString(client.font, "XYZ  " + pos.getX() + "  " + pos.getY() + "  " + pos.getZ(),
+                            16, 26, 0xFFD0D6E4, false);
+                }
+                if (VisualSettings.showFps) {
+                    graphics.drawString(client.font, "FPS  " + client.getFps(), 16, height + 3, 0xFF9EACC0, false);
+                }
+            }
+
+            if (VisualSettings.showFloatingPanel) {
+                int x = 8;
+                int y = client.getWindow().getGuiScaledHeight() - 54;
+                graphics.fill(x, y, x + 164, y + 46, 0xD90D111B);
+                graphics.fill(x, y, x + 164, y + 2, 0xFFFF9857);
+                graphics.drawString(client.font, "PASTA QUICK PANEL", x + 8, y + 8, 0xFFFFB477, false);
+                graphics.drawString(client.font, "Hit FX  " + state(VisualSettings.hitParticles)
+                        + "    Crit  " + state(VisualSettings.criticalBurst), x + 8, y + 22, 0xFFD5DCE8, false);
+                graphics.drawString(client.font, "RIGHT SHIFT: menu   H: hide", x + 8, y + 34, 0xFF8997AC, false);
             }
         });
 
@@ -59,10 +77,10 @@ public final class PastaVisualClient implements ClientModInitializer {
             if (screen instanceof TitleScreen) {
                 ScreenEvents.afterRender(screen).register((renderedScreen, graphics, mouseX, mouseY, tickDelta) -> {
                     if (!VisualSettings.menuBranding) return;
-                    graphics.fill(12, 12, 194, 66, 0xC9101420);
-                    graphics.fill(12, 12, 15, 66, 0xFFFF8A45);
-                    graphics.drawString(Minecraft.getInstance().font, "PASTA VISUAL", 25, 23, 0xFFFFB477, false);
-                    graphics.drawString(Minecraft.getInstance().font, "VISUAL CLIENT  •  1.21.11", 25, 39, 0xFFD0D6E4, false);
+                    graphics.fill(12, 12, 204, 68, 0xC9101420);
+                    graphics.fill(12, 12, 15, 68, 0xFFFF9857);
+                    graphics.drawString(Minecraft.getInstance().font, "PASTA VISUAL", 25, 22, 0xFFFFB477, false);
+                    graphics.drawString(Minecraft.getInstance().font, "VISUAL CLIENT  •  1.1.0", 25, 38, 0xFFD0D6E4, false);
                     graphics.drawString(Minecraft.getInstance().font, "RIGHT SHIFT  /  MENU", 25, 52, 0xFF8E9AAF, false);
                 });
             }
@@ -92,4 +110,6 @@ public final class PastaVisualClient implements ClientModInitializer {
             return InteractionResult.PASS;
         });
     }
+
+    private static String state(boolean enabled) { return enabled ? "ON" : "OFF"; }
 }
