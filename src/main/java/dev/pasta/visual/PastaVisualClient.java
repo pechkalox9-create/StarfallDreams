@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -27,6 +28,7 @@ public final class PastaVisualClient implements ClientModInitializer {
         VisualSettings.load();
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.pasta_visual.open",
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
                 "category.pasta_visual"
         ));
@@ -44,16 +46,15 @@ public final class PastaVisualClient implements ClientModInitializer {
                         Component.literal("✦  PASTA VISUAL"),
                         button -> client.setScreen(new PastaVisualScreen(screen))
                 ).bounds(width / 2 - 100, height - 48, 200, 20).build());
+                ScreenEvents.afterRender(screen).register((renderedScreen, graphics, mouseX, mouseY, tickDelta) -> {
+                    if (!VisualSettings.menuBranding) return;
+                    graphics.fill(12, 12, 194, 66, 0xC9101420);
+                    graphics.fill(12, 12, 15, 66, 0xFFFF8A45);
+                    graphics.drawString(Minecraft.getInstance().font, "PASTA VISUAL", 25, 23, 0xFFFFB477, false);
+                    graphics.drawString(Minecraft.getInstance().font, "VISUAL CLIENT  •  1.21.11", 25, 39, 0xFFD0D6E4, false);
+                    graphics.drawString(Minecraft.getInstance().font, "RIGHT SHIFT  /  MENU", 25, 52, 0xFF8E9AAF, false);
+                });
             }
-        });
-
-        ScreenEvents.afterRender(new TitleScreen()).register((screen, graphics, mouseX, mouseY, tickDelta) -> {
-            if (!VisualSettings.menuBranding || !(screen instanceof TitleScreen)) return;
-            graphics.fill(12, 12, 194, 66, 0xC9101420);
-            graphics.fill(12, 12, 15, 66, 0xFFFF8A45);
-            graphics.drawString(Minecraft.getInstance().font, "PASTA VISUAL", 25, 23, 0xFFFFB477, false);
-            graphics.drawString(Minecraft.getInstance().font, "VISUAL CLIENT  •  1.21.11", 25, 39, 0xFFD0D6E4, false);
-            graphics.drawString(Minecraft.getInstance().font, "RIGHT SHIFT  /  MENU", 25, 52, 0xFF8E9AAF, false);
         });
 
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
