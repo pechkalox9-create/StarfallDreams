@@ -1,10 +1,10 @@
 package dev.kocmoc.client;
 
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 public final class ClickGuiScreen extends Screen {
@@ -88,11 +88,13 @@ public final class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button != 0) {
-            return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() != 0) {
+            return super.mouseClicked(event, doubleClick);
         }
 
+        double mouseX = event.x();
+        double mouseY = event.y();
         int left = (width - PANEL_WIDTH) / 2;
         int top = (height - PANEL_HEIGHT) / 2;
         int categoryY = top + 65;
@@ -118,7 +120,7 @@ public final class ClickGuiScreen extends Screen {
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
