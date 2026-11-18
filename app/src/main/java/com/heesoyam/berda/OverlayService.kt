@@ -43,7 +43,7 @@ class OverlayService : Service() {
                     text = "CROSSHAIR: ON"
                     status.text = "Crosshair enabled (visual overlay)"
                 } else {
-                    wm.removeView(crosshair)
+                    crosshair?.let { wm.removeView(it) }
                     crosshair = null
                     text = "CROSSHAIR: OFF"
                     status.text = "Crosshair disabled"
