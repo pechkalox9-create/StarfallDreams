@@ -19,7 +19,9 @@ public final class ClickGuiScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        renderBackground(graphics, mouseX, mouseY, delta);
+        // Draw a dim overlay directly. Screen.renderBackground applies blur, which
+        // may already have been applied by Minecraft earlier in this frame.
+        graphics.fill(0, 0, this.width, this.height, 0x99000000);
 
         int left = (width - PANEL_WIDTH) / 2;
         int top = (height - PANEL_HEIGHT) / 2;
