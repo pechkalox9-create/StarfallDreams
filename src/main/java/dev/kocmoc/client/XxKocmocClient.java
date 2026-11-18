@@ -12,7 +12,12 @@ import org.lwjgl.glfw.GLFW;
 public final class XxKocmocClient implements ClientModInitializer {
     private static final List<Module> MODULES = List.of(
             new Module("Sprint", Module.Type.MOVEMENT),
-            new Module("FullBright", Module.Type.RENDER)
+            new Module("FullBright", Module.Type.RENDER),
+            new Module("Watermark", Module.Type.RENDER),
+            new Module("Coordinates", Module.Type.RENDER),
+            new Module("FPS", Module.Type.RENDER),
+            new Module("ActiveModules", Module.Type.RENDER),
+            new Module("Crosshair", Module.Type.RENDER)
     );
 
     private boolean rightShiftWasDown;
@@ -21,16 +26,15 @@ public final class XxKocmocClient implements ClientModInitializer {
         return MODULES;
     }
 
+    public static boolean isEnabled(String name) {
+        return MODULES.stream().anyMatch(module -> module.name().equals(name) && module.enabled());
+    }
+
     @Override
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(this::onEndTick);
-        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("xxkocmocx", "watermark"),
-                (graphics, deltaTracker) -> {
-                    Minecraft client = Minecraft.getInstance();
-                    if (client.player != null) {
-                        graphics.drawString(client.font, "XxKOCMOCxX", 6, 6, 0xFF8B5CF6, true);
-                    }
-                });
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("xxkocmocx", "hud"),
+                (graphics, deltaTracker) -> HudRenderer.render(Minecraft.getInstance(), graphics));
     }
 
     private void onEndTick(Minecraft client) {
