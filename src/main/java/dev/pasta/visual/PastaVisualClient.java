@@ -57,10 +57,6 @@ public final class PastaVisualClient implements ClientModInitializer {
 
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (screen instanceof TitleScreen) {
-                screen.addRenderableWidget(Button.builder(
-                        Component.literal("✦  PASTA VISUAL"),
-                        button -> client.setScreen(new PastaVisualScreen(screen))
-                ).bounds(width / 2 - 100, height - 48, 200, 20).build());
                 ScreenEvents.afterRender(screen).register((renderedScreen, graphics, mouseX, mouseY, tickDelta) -> {
                     if (!VisualSettings.menuBranding) return;
                     graphics.fill(12, 12, 194, 66, 0xC9101420);
