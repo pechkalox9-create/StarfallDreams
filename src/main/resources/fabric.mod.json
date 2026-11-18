@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "xxkocmocx",
+  "version": "${version}",
+  "name": "XxKOCMOCxX",
+  "description": "Client-side utility and PvP modules for Minecraft 1.21.11.",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.kocmoc.client.XxKocmocClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

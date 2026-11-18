@@ -1,22 +1,27 @@
-# Pastagram
+# XxKOCMOCxX
 
-Pastagram is an Android messenger starter built with Kotlin and Jetpack Compose.
+A client-side Fabric utility and PvP mod for Minecraft 1.21.11.
 
-## Current build
-- Chat list with search and sample conversations
-- Conversation screen with locally managed demo messages
-- Contacts and profile tabs
-- Material-style Android UI
-
-> This first version is a UI prototype. Messages are stored only in app memory; accounts, real-time delivery, media uploads, push notifications and server-side persistence are not connected yet.
+## Requirements
+- Java 21
+- Gradle 8.14+
+- Minecraft 1.21.11
+- Fabric Loader 0.18.1+
+- Fabric API 0.141.1+1.21.11
 
 ## Build
-Open this project in Android Studio and run the `app` configuration, or run:
-
 ```bash
-gradle assembleDebug
+gradle build
 ```
 
-APK output: `app/build/outputs/apk/debug/app-debug.apk`
+The remapped mod jar is written to `build/libs/`.
 
-The GitHub Actions workflow builds the debug APK on every push to `main` and uploads it as an artifact.
+## Controls
+- Right Shift: open/close ClickGUI
+- Click a module button to toggle it
+
+## Included modules
+- Sprint: automatically maintains sprint while moving forward.
+- FullBright: raises client gamma while enabled and restores the previous value when disabled.
+
+This project uses Mojang mappings for Minecraft 1.21.11, as recommended by Fabric for this release.
