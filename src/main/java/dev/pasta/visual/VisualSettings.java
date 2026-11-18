@@ -15,6 +15,8 @@ public final class VisualSettings {
     public static boolean criticalBurst = true;
     public static boolean menuBranding = true;
     public static boolean compactMenu = false;
+    public static boolean showHud = true;
+    public static boolean showCoordinates = true;
 
     private VisualSettings() {}
 
@@ -27,6 +29,8 @@ public final class VisualSettings {
             criticalBurst = Boolean.parseBoolean(p.getProperty("criticalBurst", "true"));
             menuBranding = Boolean.parseBoolean(p.getProperty("menuBranding", "true"));
             compactMenu = Boolean.parseBoolean(p.getProperty("compactMenu", "false"));
+            showHud = Boolean.parseBoolean(p.getProperty("showHud", "true"));
+            showCoordinates = Boolean.parseBoolean(p.getProperty("showCoordinates", "true"));
         } catch (IOException ignored) {
         }
     }
@@ -37,6 +41,8 @@ public final class VisualSettings {
         p.setProperty("criticalBurst", Boolean.toString(criticalBurst));
         p.setProperty("menuBranding", Boolean.toString(menuBranding));
         p.setProperty("compactMenu", Boolean.toString(compactMenu));
+        p.setProperty("showHud", Boolean.toString(showHud));
+        p.setProperty("showCoordinates", Boolean.toString(showCoordinates));
         try {
             Files.createDirectories(FILE.getParent());
             try (OutputStream out = Files.newOutputStream(FILE)) {
