@@ -1,27 +1,9 @@
-# XxKOCMOCxX
+# BERDA Overlay (Android)
 
-A client-side Fabric utility and PvP mod for Minecraft 1.21.11.
-
-## Requirements
-- Java 21
-- Gradle 8.14+
-- Minecraft 1.21.11
-- Fabric Loader 0.18.1+
-- Fabric API 0.141.1+1.21.11
+Standalone Android floating overlay for package `com.heesoyam.berda`.
 
 ## Build
-```bash
-gradle build
-```
+Open this project in Android Studio (JDK 17, Android Gradle Plugin 8.7.3, Android SDK 35), then build the `app` debug variant.
 
-The remapped mod jar is written to `build/libs/`.
-
-## Controls
-- Right Shift: open/close ClickGUI
-- Click a module button to toggle it
-
-## Included modules
-- Sprint: automatically maintains sprint while moving forward.
-- FullBright: raises client gamma while enabled and restores the previous value when disabled.
-
-This project uses Mojang mappings for Minecraft 1.21.11, as recommended by Fabric for this release.
+## Use
+Install the app, grant **Display over other apps**, then tap **Enable overlay**. The floating panel contains `INJECT` and `CLOSE` controls. `INJECT` is a demonstration UI action only: this project does not access, modify, or inject code into BERDA or another game's memory/process.
