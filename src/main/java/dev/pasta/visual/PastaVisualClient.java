@@ -27,11 +27,12 @@ public final class PastaVisualClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         VisualSettings.load();
+        KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("pasta_visual", "controls"));
         openMenu = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.pasta_visual.open",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT_SHIFT,
-                "category.pasta_visual"
+                category
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
