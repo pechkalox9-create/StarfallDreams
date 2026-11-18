@@ -13,7 +13,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40, 60, 40, 40) }
         layout.addView(TextView(this).apply { text = "BERDA Overlay"; textSize = 24f })
-        layout.addView(TextView(this).apply { text = "Standalone floating panel. No game process or memory access." })
+        layout.addView(TextView(this).apply { text = "Standalone HUD tools. No game process or memory access." })
         layout.addView(Button(this).apply {
             text = "Enable overlay"
             setOnClickListener {
