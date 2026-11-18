@@ -17,7 +17,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
+      # GitHub's ubuntu runner already includes the Android SDK. Avoid
+      # setup-android's deprecated "tools" package install, which now fails.
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
