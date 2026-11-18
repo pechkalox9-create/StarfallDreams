@@ -1,34 +1,22 @@
-# Pasta Visual
+# Pastagram
 
-A client-side visual mod for **Minecraft Java 1.21.11 + Fabric**.
+Pastagram is an Android messenger starter built with Kotlin and Jetpack Compose.
 
-## Included in this first release
+## Current build
+- Chat list with search and sample conversations
+- Conversation screen with locally managed demo messages
+- Contacts and profile tabs
+- Material-style Android UI
 
-- Custom Pasta Visual panel on the Minecraft title screen.
-- Dedicated in-game ClickGUI opened with **Right Shift**.
-- Hit particles around attacked living entities.
-- Separate critical-hit particle burst.
-- Toggles for the main-menu branding and compact settings panel.
-- Settings saved to `.minecraft/config/pasta-visual.properties`.
-- Client-side only: no server installation and no gameplay packet modifications.
+> This first version is a UI prototype. Messages are stored only in app memory; accounts, real-time delivery, media uploads, push notifications and server-side persistence are not connected yet.
 
 ## Build
-
-Requirements: JDK 21, Gradle, Fabric Loom 1.14.
+Open this project in Android Studio and run the `app` configuration, or run:
 
 ```bash
-gradle build
+gradle assembleDebug
 ```
 
-The remapped mod JAR is written to `build/libs/pasta-visual-1.0.0.jar`.
+APK output: `app/build/outputs/apk/debug/app-debug.apk`
 
-## Install
-
-Put the JAR and Fabric API for Minecraft 1.21.11 in the selected Fabric profile's `mods` folder.
-
-## Controls
-
-- **Right Shift** — open/close Pasta Visual.
-- Use the title-screen **PASTA VISUAL** button to open settings from the main menu.
-
-All visual effects are local client cosmetics. Attack timing, damage, movement and server packets remain vanilla.
+The GitHub Actions workflow builds the debug APK on every push to `main` and uploads it as an artifact.
