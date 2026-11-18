@@ -12,7 +12,6 @@ import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -23,6 +22,8 @@ import org.lwjgl.glfw.GLFW;
 public final class PastaVisualClient implements ClientModInitializer {
     private static KeyMapping openMenu;
     private static KeyMapping toggleFloating;
+    private static KeyMapping toggleHitFx;
+    private static KeyMapping toggleCritFx;
 
     @Override
     public void onInitializeClient() {
@@ -32,11 +33,23 @@ public final class PastaVisualClient implements ClientModInitializer {
                 "key.pasta_visual.open", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, category));
         toggleFloating = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.pasta_visual.floating", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, category));
+        toggleHitFx = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.pasta_visual.hitfx", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, category));
+        toggleCritFx = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.pasta_visual.critfx", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, category));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openMenu.consumeClick()) client.setScreen(new PastaVisualScreen(client.screen));
             while (toggleFloating.consumeClick()) {
                 VisualSettings.showFloatingPanel = !VisualSettings.showFloatingPanel;
+                VisualSettings.save();
+            }
+            while (toggleHitFx.consumeClick()) {
+                VisualSettings.hitParticles = !VisualSettings.hitParticles;
+                VisualSettings.save();
+            }
+            while (toggleCritFx.consumeClick()) {
+                VisualSettings.criticalBurst = !VisualSettings.criticalBurst;
                 VisualSettings.save();
             }
         });
@@ -64,12 +77,12 @@ public final class PastaVisualClient implements ClientModInitializer {
             if (VisualSettings.showFloatingPanel) {
                 int x = 8;
                 int y = client.getWindow().getGuiScaledHeight() - 54;
-                graphics.fill(x, y, x + 164, y + 46, 0xD90D111B);
-                graphics.fill(x, y, x + 164, y + 2, 0xFFFF9857);
+                graphics.fill(x, y, x + 178, y + 46, 0xD90D111B);
+                graphics.fill(x, y, x + 178, y + 2, 0xFFFF9857);
                 graphics.drawString(client.font, "PASTA QUICK PANEL", x + 8, y + 8, 0xFFFFB477, false);
-                graphics.drawString(client.font, "Hit FX  " + state(VisualSettings.hitParticles)
-                        + "    Crit  " + state(VisualSettings.criticalBurst), x + 8, y + 22, 0xFFD5DCE8, false);
-                graphics.drawString(client.font, "RIGHT SHIFT: menu   H: hide", x + 8, y + 34, 0xFF8997AC, false);
+                graphics.drawString(client.font, "Hit FX J: " + state(VisualSettings.hitParticles)
+                        + "   Crit K: " + state(VisualSettings.criticalBurst), x + 8, y + 22, 0xFFD5DCE8, false);
+                graphics.drawString(client.font, "Right Shift: GUI   H: hide panel", x + 8, y + 34, 0xFF8997AC, false);
             }
         });
 
