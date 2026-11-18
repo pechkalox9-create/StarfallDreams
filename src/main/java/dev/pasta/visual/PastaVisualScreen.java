@@ -16,7 +16,7 @@ public final class PastaVisualScreen extends Screen {
     @Override
     protected void init() {
         int left = this.width / 2 - 150;
-        int top = this.height / 2 - 104;
+        int top = this.height / 2 - 130;
         int gap = 25;
         addRenderableWidget(toggle("Hit particles", () -> VisualSettings.hitParticles,
                 value -> VisualSettings.hitParticles = value, left, top + gap));
@@ -26,10 +26,14 @@ public final class PastaVisualScreen extends Screen {
                 value -> VisualSettings.menuBranding = value, left, top + gap * 3));
         addRenderableWidget(toggle("Compact menu", () -> VisualSettings.compactMenu,
                 value -> VisualSettings.compactMenu = value, left, top + gap * 4));
+        addRenderableWidget(toggle("Pasta HUD watermark", () -> VisualSettings.showHud,
+                value -> VisualSettings.showHud = value, left, top + gap * 5));
+        addRenderableWidget(toggle("Coordinate display", () -> VisualSettings.showCoordinates,
+                value -> VisualSettings.showCoordinates = value, left, top + gap * 6));
         addRenderableWidget(Button.builder(Component.literal("Save settings"), b -> VisualSettings.save())
-                .bounds(left, top + gap * 6, 145, 20).build());
+                .bounds(left, top + gap * 8, 145, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Back"), b -> onClose())
-                .bounds(left + 155, top + gap * 6, 145, 20).build());
+                .bounds(left + 155, top + gap * 8, 145, 20).build());
     }
 
     private Button toggle(String label, java.util.function.Supplier<Boolean> getter,
@@ -49,7 +53,7 @@ public final class PastaVisualScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(graphics, mouseX, mouseY, partialTick);
         int panelWidth = VisualSettings.compactMenu ? 330 : 380;
-        int panelHeight = 250;
+        int panelHeight = 300;
         int x = width / 2 - panelWidth / 2;
         int y = height / 2 - panelHeight / 2;
         graphics.fill(x - 1, y - 1, x + panelWidth + 1, y + panelHeight + 1, 0xFFFF8A45);
@@ -57,7 +61,7 @@ public final class PastaVisualScreen extends Screen {
         graphics.fill(x, y, x + panelWidth, y + 2, 0xFFFF8A45);
         graphics.drawString(font, "PASTA VISUAL", x + 16, y + 14, 0xFFFFB477, false);
         graphics.drawString(font, "VISUAL SETTINGS  /  FABRIC 1.21.11", x + 16, y + 29, 0xFF9AA8BC, false);
-        graphics.drawString(font, "COMBAT & INTERFACE", x + 16, y + 56, 0xFFE9EDF5, false);
+        graphics.drawString(font, "COMBAT  /  HUD  /  INTERFACE", x + 16, y + 56, 0xFFE9EDF5, false);
         super.render(graphics, mouseX, mouseY, partialTick);
         graphics.drawString(font, "Changes are client-side. Press Right Shift to reopen.", x + 16, y + panelHeight - 18, 0xFF7F8DA3, false);
     }
