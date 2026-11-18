@@ -17,8 +17,22 @@ public final class VisualSettings {
     public static boolean compactMenu = false;
     public static boolean showHud = true;
     public static boolean showCoordinates = true;
+    public static boolean showFps = true;
+    public static boolean showFloatingPanel = false;
 
     private VisualSettings() {}
+
+    public static void reset() {
+        hitParticles = true;
+        criticalBurst = true;
+        menuBranding = true;
+        compactMenu = false;
+        showHud = true;
+        showCoordinates = true;
+        showFps = true;
+        showFloatingPanel = false;
+        save();
+    }
 
     public static void load() {
         if (!Files.exists(FILE)) return;
@@ -31,6 +45,8 @@ public final class VisualSettings {
             compactMenu = Boolean.parseBoolean(p.getProperty("compactMenu", "false"));
             showHud = Boolean.parseBoolean(p.getProperty("showHud", "true"));
             showCoordinates = Boolean.parseBoolean(p.getProperty("showCoordinates", "true"));
+            showFps = Boolean.parseBoolean(p.getProperty("showFps", "true"));
+            showFloatingPanel = Boolean.parseBoolean(p.getProperty("showFloatingPanel", "false"));
         } catch (IOException ignored) {
         }
     }
@@ -43,10 +59,12 @@ public final class VisualSettings {
         p.setProperty("compactMenu", Boolean.toString(compactMenu));
         p.setProperty("showHud", Boolean.toString(showHud));
         p.setProperty("showCoordinates", Boolean.toString(showCoordinates));
+        p.setProperty("showFps", Boolean.toString(showFps));
+        p.setProperty("showFloatingPanel", Boolean.toString(showFloatingPanel));
         try {
             Files.createDirectories(FILE.getParent());
             try (OutputStream out = Files.newOutputStream(FILE)) {
-                p.store(out, "Pasta Visual settings");
+                p.store(out, "Pasta Visual 1.1.0 settings");
             }
         } catch (IOException ignored) {
         }

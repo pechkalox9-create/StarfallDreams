@@ -3,7 +3,7 @@
   "id": "pasta_visual",
   "version": "${version}",
   "name": "Pasta Visual",
-  "description": "A client-side visual customization mod with a custom menu, click GUI and combat particles.",
+  "description": "A redesigned visual client with categorized ClickGUI, HUD tools, and a floating quick panel.",
   "authors": ["Pasta Visual"],
   "contact": {
     "sources": "https://github.com/pechkalox9-create/StarfallDreams"
