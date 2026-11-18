@@ -2,6 +2,9 @@ name: Build Berda Overlay APK
 on:
   push:
     branches: [ "berda-overlay" ]
+    paths:
+      - "android-overlay/**"
+      - ".github/workflows/build-berda-apk.yml"
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,8 +19,8 @@ jobs:
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
       - uses: android-actions/setup-android@v3
-      - run: gradle assembleDebug
+      - run: gradle -p android-overlay assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: BerdaOverlay-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android-overlay/app/build/outputs/apk/debug/app-debug.apk
