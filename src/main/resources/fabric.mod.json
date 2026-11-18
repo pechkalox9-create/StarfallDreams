@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "starfall_dreams",
+  "version": "${version}",
+  "name": "Starfall Dreams",
+  "description": "A quiet night-sky spectacle with drifting shooting stars, glowing trails and rare celestial bursts.",
+  "authors": ["pechkalox9-create"],
+  "contact": {
+    "sources": "https://github.com/pechkalox9-create/StarfallDreams"
+  },
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.starfalldreams.StarfallDreamsClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
