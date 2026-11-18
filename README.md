@@ -1,25 +1,34 @@
-# Starfall Dreams
+# Pasta Visual
 
-A client-side Fabric mod for Minecraft **1.21.11**.
+A client-side visual mod for **Minecraft Java 1.21.11 + Fabric**.
 
-Starfall Dreams adds occasional animated shooting stars to the night sky:
-- individually varied diagonal flight paths and speeds;
-- layered glowing trails with subtle accent particles;
-- rare brighter meteors that end in a small starburst;
-- night-only activity, with no server installation required.
+## Included in this first release
+
+- Custom Pasta Visual panel on the Minecraft title screen.
+- Dedicated in-game ClickGUI opened with **Right Shift**.
+- Hit particles around attacked living entities.
+- Separate critical-hit particle burst.
+- Toggles for the main-menu branding and compact settings panel.
+- Settings saved to `.minecraft/config/pasta-visual.properties`.
+- Client-side only: no server installation and no gameplay packet modifications.
 
 ## Build
 
-Requires Java 21 and Gradle.
+Requirements: JDK 21, Gradle, Fabric Loom 1.14.
 
 ```bash
 gradle build
 ```
 
-The distributable remapped mod JAR is written to `build/libs/starfall-dreams-1.0.0.jar`.
+The remapped mod JAR is written to `build/libs/pasta-visual-1.0.0.jar`.
 
 ## Install
 
-Put the built JAR in the `.minecraft/mods` folder alongside Fabric Loader and Fabric API for Minecraft 1.21.11.
+Put the JAR and Fabric API for Minecraft 1.21.11 in the selected Fabric profile's `mods` folder.
 
-This is an original implementation and does not include assets or code from other mods.
+## Controls
+
+- **Right Shift** — open/close Pasta Visual.
+- Use the title-screen **PASTA VISUAL** button to open settings from the main menu.
+
+All visual effects are local client cosmetics. Attack timing, damage, movement and server packets remain vanilla.
