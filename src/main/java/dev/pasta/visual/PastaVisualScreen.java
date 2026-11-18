@@ -51,7 +51,9 @@ public final class PastaVisualScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
+        // Avoid Screen.renderBackground(): Minecraft 1.21.11 can apply blur only once per frame.
+        // A solid translucent fill keeps the custom GUI safe on mobile OpenGL renderers.
+        graphics.fill(0, 0, this.width, this.height, 0xC0101010);
         int panelWidth = VisualSettings.compactMenu ? 330 : 380;
         int panelHeight = 300;
         int x = width / 2 - panelWidth / 2;
