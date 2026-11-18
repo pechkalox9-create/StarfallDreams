@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -38,6 +40,19 @@ public final class PastaVisualClient implements ClientModInitializer {
             }
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> VisualSettings.save());
+
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("pasta_visual", "watermark"), (graphics, deltaTracker) -> {
+            Minecraft client = Minecraft.getInstance();
+            if (client.player == null || !VisualSettings.showHud) return;
+            graphics.fill(8, 8, 126, VisualSettings.showCoordinates ? 39 : 27, 0xB8101420);
+            graphics.fill(8, 8, 10, VisualSettings.showCoordinates ? 39 : 27, 0xFFFF8A45);
+            graphics.drawString(client.font, "PASTA VISUAL", 16, 13, 0xFFFFB477, false);
+            if (VisualSettings.showCoordinates) {
+                var pos = client.player.blockPosition();
+                graphics.drawString(client.font, "XYZ  " + pos.getX() + "  " + pos.getY() + "  " + pos.getZ(),
+                        16, 26, 0xFFD0D6E4, false);
+            }
+        });
 
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (screen instanceof TitleScreen) {
