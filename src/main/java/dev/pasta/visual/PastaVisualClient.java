@@ -14,7 +14,6 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -68,8 +67,8 @@ public final class PastaVisualClient implements ClientModInitializer {
                             Math.cos(a) * 0.055, 0.025 + (i % 3) * 0.018, Math.sin(a) * 0.055);
                 }
             }
-            if (VisualSettings.criticalBurst && player instanceof Player p
-                    && !p.onGround() && p.fallDistance > 0.0F && !p.isInWater()) {
+            if (VisualSettings.criticalBurst && !player.onGround()
+                    && player.fallDistance > 0.0F && !player.isInWater()) {
                 ClientLevel level = (ClientLevel) world;
                 Vec3 pos = target.position().add(0, target.getBbHeight() * 0.65, 0);
                 for (int i = 0; i < 14; i++) {
