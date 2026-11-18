@@ -1,5 +1,7 @@
 {
   "key.pasta_visual.open": "Open Pasta Visual",
   "key.pasta_visual.floating": "Toggle Pasta Visual floating panel",
+  "key.pasta_visual.hitfx": "Toggle hit particles",
+  "key.pasta_visual.critfx": "Toggle critical burst",
   "key.category.pasta_visual.controls": "Pasta Visual"
 }
