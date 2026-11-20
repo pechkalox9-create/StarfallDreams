@@ -144,6 +144,18 @@ public:
         actionRow->addWidget(launch);
         root->addLayout(actionRow);
 
+        auto *pluginRow = new QHBoxLayout;
+        pluginDirectory_ = new QLineEdit;
+        pluginDirectory_->setPlaceholderText("Choose the game's supported plugin / mods folder");
+        auto *pluginBrowse = new QPushButton("Browse");
+        auto *stageDll = new QPushButton("Stage DLL for selected process");
+        stageDll->setObjectName("primary");
+        pluginRow->addWidget(new QLabel("PLUGIN FOLDER"));
+        pluginRow->addWidget(pluginDirectory_, 1);
+        pluginRow->addWidget(pluginBrowse);
+        pluginRow->addWidget(stageDll);
+        root->addLayout(pluginRow);
+
         auto *panels = new QHBoxLayout;
         auto *processPanel = new QVBoxLayout;
         auto *processTitleRow = new QHBoxLayout;
@@ -175,7 +187,7 @@ public:
         panels->addLayout(logPanel, 2);
         root->addLayout(panels, 1);
 
-        auto *footer = new QLabel("Launch-time Wine DLL override  •  No injection into running processes");
+        auto *footer = new QLabel("Cooperative plugin staging for a selected Wine process  •  No remote-process injection");
         footer->setObjectName("footer");
         root->addWidget(footer);
         setCentralWidget(central);
@@ -197,13 +209,18 @@ public:
         connect(exePath_, &QLineEdit::editingFinished, this, [this] { updateArchitecture(); });
         connect(dllPath_, &QLineEdit::editingFinished, this, [this] { updateArchitecture(); });
         connect(refresh, &QPushButton::clicked, this, [this] { refreshProcesses(); });
+        connect(pluginBrowse, &QPushButton::clicked, this, [this] {
+            const QString dir = QFileDialog::getExistingDirectory(this, "Choose supported game plugin folder");
+            if (!dir.isEmpty()) pluginDirectory_->setText(dir);
+        });
+        connect(stageDll, &QPushButton::clicked, this, [this] { stageDllForSelectedProcess(); });
         connect(launch, &QPushButton::clicked, this, [this] { launchWithWine(); });
 
         auto *timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, [this] { refreshProcesses(); });
         timer->start(5000);
         refreshProcesses();
-        appendLog("WineBridge ready. Select an EXE and a native DLL to begin.");
+        appendLog("WineBridge ready. Select a process, DLL and the game-supported plugin folder.");
     }
 
 private:
@@ -244,6 +261,63 @@ private:
             processTable_->setItem(row, 0, new QTableWidgetItem(entry));
             processTable_->setItem(row, 1, new QTableWidgetItem(command));
         }
+    }
+
+    void stageDllForSelectedProcess()
+    {
+        const int row = processTable_->currentRow();
+        if (row < 0 || !processTable_->item(row, 0)) {
+            QMessageBox::information(this, "Select a process", "Select the running game process first.");
+            return;
+        }
+
+        const QString pid = processTable_->item(row, 0)->text();
+        const QString dll = QFileInfo(dllPath_->text().trimmed()).absoluteFilePath();
+        const QString targetDir = QDir::cleanPath(pluginDirectory_->text().trimmed());
+
+        if (!QFileInfo(dll).isFile() || QFileInfo(dll).suffix().compare("dll", Qt::CaseInsensitive) != 0) {
+            QMessageBox::warning(this, "Choose a DLL", "Choose a valid .dll file first.");
+            return;
+        }
+        if (targetDir.isEmpty() || !QFileInfo(targetDir).isDir()) {
+            QMessageBox::warning(this, "Choose plugin folder",
+                                 "Choose an existing plugin/mod folder supported by the game.");
+            return;
+        }
+
+        const QString dllArch = architectureOf(dll);
+        if (dllArch != "x86" && dllArch != "x86-64" && dllArch != "ARM64") {
+            QMessageBox::warning(this, "Invalid DLL", "The selected file is not a supported PE DLL.");
+            return;
+        }
+
+        const QString destination = QDir(targetDir).filePath(QFileInfo(dll).fileName());
+        if (QFileInfo(dll).absoluteFilePath() == QFileInfo(destination).absoluteFilePath()) {
+            appendLog(QString("DLL is already in the selected plugin folder (PID %1).").arg(pid));
+            return;
+        }
+        if (QFileInfo::exists(destination)) {
+            const auto answer = QMessageBox::question(this, "Replace plugin",
+                "A file with this name already exists. Replace it?",
+                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+            if (answer != QMessageBox::Yes) return;
+            if (!QFile::remove(destination)) {
+                QMessageBox::critical(this, "Copy failed", "Could not replace the existing DLL.");
+                return;
+            }
+        }
+        if (!QFile::copy(dll, destination)) {
+            QMessageBox::critical(this, "Copy failed",
+                                  "Could not copy the DLL. Check folder permissions and free space.");
+            appendLog("Failed to stage DLL: " + destination);
+            return;
+        }
+
+        appendLog(QString("Staged %1 for selected process PID %2 at %3.")
+                  .arg(QFileInfo(dll).fileName(), pid, destination));
+        appendLog("The game must support this plugin folder and load the DLL itself; no live injection was performed.");
+        QMessageBox::information(this, "DLL staged",
+            "The DLL was copied to the selected plugin folder. The running game must support that folder and load plugins itself. This operation does not inject code into the process.");
     }
 
     void launchWithWine()
@@ -323,6 +397,7 @@ private:
     QLineEdit *exePath_ = nullptr;
     QLineEdit *dllPath_ = nullptr;
     QLineEdit *winePath_ = nullptr;
+    QLineEdit *pluginDirectory_ = nullptr;
     QLabel *exeArch_ = nullptr;
     QLabel *dllArch_ = nullptr;
     QTableWidget *processTable_ = nullptr;
