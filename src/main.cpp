@@ -14,11 +14,14 @@
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QProcessEnvironment>
+#include <QRegularExpression>
 #include <QPushButton>
 #include <QStandardPaths>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTimer>
+#include <QTime>
+#include <QAbstractItemView>
 #include <QVBoxLayout>
 #include <QtEndian>
 
