@@ -65,7 +65,7 @@ static void openPlugins() {
     if (g_game.empty()) { logLine(L"Select the StandChillow folder first."); return; }
     fs::path p=g_game/L"BepInEx"/L"plugins";
     std::error_code ec; fs::create_directories(p,ec);
-    if (ec) { logLine(L"Could not create BepInEx/plugins: "+ec.message().c_str()); return; }
+    if (ec) { logLine(L"Could not create BepInEx/plugins. Check folder permissions."); return; }
     ShellExecuteW(nullptr,L"open",p.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
     logLine(L"Opened plugin folder. Put only compatible Unity plugin DLLs here.");
 }
