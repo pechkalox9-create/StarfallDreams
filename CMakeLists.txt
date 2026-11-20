@@ -14,6 +14,10 @@ qt_add_executable(winebridge
 )
 
 target_link_libraries(winebridge PRIVATE Qt6::Widgets)
-target_compile_options(winebridge PRIVATE -Wall -Wextra -Wpedantic)
+if(MSVC)
+    target_compile_options(winebridge PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(winebridge PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 install(TARGETS winebridge RUNTIME DESTINATION bin)
