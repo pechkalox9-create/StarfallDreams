@@ -1,33 +1,43 @@
-# StarfallDreams — StandChillow Mod Manager
+# StarfallDreams — StandChillow DLL Loader
 
-A small Windows GUI helper for inspecting a StandChillow Unity installation and opening its BepInEx plugin directory. Designed to be usable under Wine as a Windows desktop application.
+A Windows GUI utility designed to run under Wine on Linux. It provides a DLL-selection workflow for StandChillow Unity plugins.
 
-## What it does
-- Selects the StandChillow game root folder.
-- Checks for the game executable and detects Unity Mono (`*_Data/Managed`) or IL2CPP (`*_Data/il2cpp_data`).
-- Creates/opens `BepInEx/plugins` for placing compatible plugin DLLs.
-- Does **not** inject DLLs into arbitrary processes or modify game memory.
+## Features
+- Select the StandChillow installation folder and detect its executable.
+- Detect a Unity Mono or IL2CPP data folder.
+- Select a plugin DLL and copy it into `BepInEx/plugins`.
+- List and remove staged plugin DLLs.
+- Launch StandChillow and check whether its process is running.
+- Activity log for all operations.
+
+## Important: how DLL loading works
+
+This utility stages Unity plugin DLLs in BepInEx's plugin directory. A compatible BepInEx installation must already be installed and configured for the game's Unity runtime and architecture. BepInEx then loads compatible plugins when the game starts.
+
+**This is not a remote-process injector:** it does not inject arbitrary DLLs into a running process, modify game memory, or bypass anti-cheat/security controls. A random Windows DLL is not necessarily a Unity plugin; it must be built for the game's runtime and plugin API.
 
 ## Build
-Requires CMake 3.20+ and a C++17 Windows compiler (Visual Studio 2022 recommended):
+
+Requires CMake 3.20+ and Visual Studio 2022 (x64):
 
 ```powershell
 cmake -S . -B build -A x64
 cmake --build build --config Release
 ```
 
-The Windows executable is `build/Release/StarfallDreams.exe`.
+Output: `build/Release/StarfallDreams.exe`.
 
-## StandChillow compatibility
-The exact loader package cannot be selected safely until the installed game folder is inspected:
-- `StandChillow_Data/Managed` usually indicates Unity Mono.
-- `StandChillow_Data/il2cpp_data` indicates Unity IL2CPP.
-- Confirm the game's executable architecture (x86/x64) before installing any loader.
+## Run under Wine
 
-BepInEx has separate runtime/architecture builds. Follow the [official installation guide](https://docs.bepinex.dev/articles/user_guide/installation/). IL2CPP and Mono require different packages; do not mix them.
+```bash
+wine StarfallDreams.exe
+```
 
-## Wine
-Run the Windows build with `wine StarfallDreams.exe`. The game and loader themselves must also be compatible with the selected Wine prefix.
+Use the same Wine prefix for the utility and StandChillow if you want the game paths and installed components to match.
 
-## Important
-This is an installation-folder helper, not a finished game mod or a universal DLL injector. A working StandChillow plugin still needs game-specific APIs and testing in the offline/bot mode.
+## Runtime detection
+
+- `*_Data/Managed` usually indicates Unity Mono.
+- `*_Data/il2cpp_data` usually indicates Unity IL2CPP.
+
+Install the corresponding BepInEx distribution. Detection is a heuristic and does not establish compatibility by itself.
