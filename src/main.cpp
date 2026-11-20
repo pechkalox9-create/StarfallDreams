@@ -1,95 +1,114 @@
-#include <QApplication>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QLabel>
-#include <QMainWindow>
-#include <QPushButton>
-#include <QProcess>
-#include <QTextEdit>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QDateTime>
+#define UNICODE
+#define _UNICODE
+#include <windows.h>
+#include <shlobj.h>
+#include <shellapi.h>
+#include <commctrl.h>
+#include <filesystem>
+#include <string>
+#include <vector>
 
-class MainWindow final : public QMainWindow {
-    Q_OBJECT
-public:
-    MainWindow() {
-        setWindowTitle("StarfallDreams — DLL Test Console");
-        resize(760, 520);
-        auto *root = new QWidget;
-        auto *layout = new QVBoxLayout(root);
-        layout->setContentsMargins(24, 24, 24, 24);
-        layout->setSpacing(14);
-        auto *heading = new QLabel("STARFALL DREAMS");
-        heading->setStyleSheet("font-size:22px;font-weight:700;letter-spacing:3px;color:#e8eaf6;");
-        auto *sub = new QLabel("Wine-compatible DLL test environment");
-        sub->setStyleSheet("color:#8d95ad;font-size:12px;");
-        layout->addWidget(heading);
-        layout->addWidget(sub);
-        auto *section = new QLabel("TEST MODULE");
-        section->setStyleSheet("color:#9ca7c5;font-weight:600;margin-top:16px;");
-        layout->addWidget(section);
-        auto *row = new QHBoxLayout;
-        dllPath = new QLabel("No DLL selected");
-        dllPath->setStyleSheet("background:#171b2a;border:1px solid #303852;border-radius:7px;padding:12px;color:#b8c1d9;");
-        auto *browse = new QPushButton("Browse DLL");
-        connect(browse, &QPushButton::clicked, this, &MainWindow::chooseDll);
-        row->addWidget(dllPath, 1);
-        row->addWidget(browse);
-        layout->addLayout(row);
-        auto *launch = new QPushButton("Launch isolated test host");
-        launch->setMinimumHeight(42);
-        launch->setStyleSheet("QPushButton{background:#6758d8;color:white;border:0;border-radius:7px;font-weight:600;} QPushButton:hover{background:#786be6;}");
-        connect(launch, &QPushButton::clicked, this, &MainWindow::launchHost);
-        layout->addWidget(launch);
-        auto *note = new QLabel("The DLL is loaded only by the companion test host. This tool does not inject into unrelated processes.");
-        note->setWordWrap(true);
-        note->setStyleSheet("color:#d5b879;background:#292516;border:1px solid #5a4924;border-radius:6px;padding:10px;");
-        layout->addWidget(note);
-        layout->addWidget(new QLabel("ACTIVITY LOG"));
-        log = new QTextEdit;
-        log->setReadOnly(true);
-        layout->addWidget(log, 1);
-        setCentralWidget(root);
-        setStyleSheet("QMainWindow,QWidget{background:#10131e;color:#e8eaf6;font-family:'Segoe UI',sans-serif;} QPushButton{background:#252b40;border:1px solid #3a4564;border-radius:7px;padding:10px 16px;color:#e8eaf6;} QPushButton:hover{background:#303852;} QTextEdit{background:#0b0e16;border:1px solid #303852;border-radius:7px;color:#a9e6c2;padding:8px;}");
-        appendLog("Application ready.");
-    }
-private slots:
-    void chooseDll() {
-        const auto path = QFileDialog::getOpenFileName(this, "Select DLL", {}, "Windows libraries (*.dll);;All files (*)");
-        if (path.isEmpty()) return;
-        dll = path;
-        dllPath->setText(QFileInfo(path).fileName());
-        dllPath->setToolTip(path);
-        appendLog("Selected: " + path);
-    }
-    void launchHost() {
-        if (dll.isEmpty()) { appendLog("ERROR: select a DLL first."); return; }
-#ifdef Q_OS_WIN
-        const QString host = QCoreApplication::applicationDirPath() + "/DllTestHost.exe";
-#else
-        const QString host = QCoreApplication::applicationDirPath() + "/DllTestHost";
-#endif
-        if (!QFileInfo::exists(host)) { appendLog("ERROR: DllTestHost executable not found: " + host); return; }
-        auto *process = new QProcess(this);
-        connect(process, &QProcess::readyReadStandardOutput, this, [this, process] { appendLog(QString::fromLocal8Bit(process->readAllStandardOutput()).trimmed()); });
-        connect(process, &QProcess::readyReadStandardError, this, [this, process] { appendLog(QString::fromLocal8Bit(process->readAllStandardError()).trimmed()); });
-        connect(process, &QProcess::finished, this, [this, process](int code) { appendLog(QString("Test host exited: %1").arg(code)); process->deleteLater(); });
-        process->start(host, {dll});
-        if (!process->waitForStarted(3000)) appendLog("ERROR: could not start test host.");
-        else appendLog("Started isolated test host.");
-    }
-private:
-    void appendLog(const QString &message) { log->append("[" + QDateTime::currentDateTime().toString("HH:mm:ss") + "] " + message.toHtmlEscaped()); }
-    QLabel *dllPath{};
-    QTextEdit *log{};
-    QString dll;
-};
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-    MainWindow window;
-    window.show();
-    return app.exec();
+namespace fs = std::filesystem;
+static HWND g_path, g_status, g_log, g_plugins, g_open;
+static fs::path g_game;
+static const wchar_t* kClass = L"StarfallDreamsWindow";
+
+static void logLine(const std::wstring& s) {
+    int n = GetWindowTextLengthW(g_log);
+    SendMessageW(g_log, EM_SETSEL, n, n);
+    std::wstring line = s + L"\r\n";
+    SendMessageW(g_log, EM_REPLACESEL, FALSE, (LPARAM)line.c_str());
 }
-#include "main.moc"
+static bool hasExe(const fs::path& p) {
+    return fs::exists(p / L"StandChillow.exe") || fs::exists(p / L"StandChillow_x64.exe");
+}
+static std::wstring detectRuntime(const fs::path& root) {
+    std::error_code ec;
+    for (auto const& e : fs::directory_iterator(root, ec)) {
+        if (!e.is_directory(ec)) continue;
+        const auto name = e.path().filename().wstring();
+        if (name.size() > 5 && name.substr(name.size()-5) == L"_Data") {
+            auto data = e.path();
+            if (fs::exists(data / L"il2cpp_data")) return L"Unity IL2CPP";
+            if (fs::exists(data / L"Managed")) return L"Unity Mono";
+        }
+    }
+    if (fs::exists(root / L"il2cpp_data")) return L"Unity IL2CPP";
+    if (fs::exists(root / L"Managed")) return L"Unity Mono";
+    return L"Runtime not detected (need game folder screenshot)";
+}
+static void inspect() {
+    if (g_game.empty()) return;
+    const auto runtime = detectRuntime(g_game);
+    const bool exe = hasExe(g_game);
+    SetWindowTextW(g_status, (std::wstring(exe ? L"StandChillow executable found  |  " : L"EXE not found  |  ") + runtime).c_str());
+    logLine(L"Game folder: " + g_game.wstring());
+    logLine(L"Detected: " + runtime);
+    if (!exe) logLine(L"Check that the selected folder contains StandChillow.exe.");
+    if (runtime.find(L"not detected") != std::wstring::npos)
+        logLine(L"Please select the game's root folder (the folder containing the .exe).");
+    else
+        logLine(L"Next: use the matching BepInEx build only after confirming the game architecture.");
+}
+static void chooseFolder(HWND hwnd) {
+    BROWSEINFOW bi{}; bi.hwndOwner=hwnd; bi.lpszTitle=L"Select the StandChillow game folder";
+    bi.ulFlags=BIF_RETURNONLYFSDIRS|BIF_NEWDIALOGSTYLE;
+    PIDLIST_ABSOLUTE pid=SHBrowseForFolderW(&bi);
+    if (!pid) return;
+    wchar_t buf[MAX_PATH]{};
+    if (SHGetPathFromIDListW(pid,buf)) {
+        g_game=buf; SetWindowTextW(g_path,g_game.c_str()); inspect();
+    }
+    CoTaskMemFree(pid);
+}
+static void openPlugins() {
+    if (g_game.empty()) { logLine(L"Select the StandChillow folder first."); return; }
+    fs::path p=g_game/L"BepInEx"/L"plugins";
+    std::error_code ec; fs::create_directories(p,ec);
+    if (ec) { logLine(L"Could not create BepInEx/plugins: "+ec.message().c_str()); return; }
+    ShellExecuteW(nullptr,L"open",p.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
+    logLine(L"Opened plugin folder. Put only compatible Unity plugin DLLs here.");
+}
+static void openGame() {
+    if (g_game.empty()) { logLine(L"Select the StandChillow folder first."); return; }
+    ShellExecuteW(nullptr,L"open",g_game.c_str(),nullptr,nullptr,SW_SHOWNORMAL);
+}
+static HWND make(HWND parent,const wchar_t* cls,const wchar_t* text,DWORD style,int x,int y,int w,int h,int id) {
+    return CreateWindowExW(0,cls,text,WS_CHILD|WS_VISIBLE|style,x,y,w,h,parent,(HMENU)(INT_PTR)id,GetModuleHandleW(nullptr),nullptr);
+}
+static LRESULT CALLBACK wndProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) {
+    switch(msg) {
+    case WM_CREATE: {
+        HFONT font=(HFONT)GetStockObject(DEFAULT_GUI_FONT);
+        make(hwnd,L"STATIC",L"STARFALL DREAMS  /  STANDCHILLOW",0,24,18,600,30,0);
+        make(hwnd,L"STATIC",L"Unity mod manager  •  Windows / Wine",0,25,50,600,22,0);
+        make(hwnd,L"STATIC",L"GAME FOLDER",0,25,92,150,20,0);
+        g_path=make(hwnd,L"EDIT",L"",WS_BORDER|ES_AUTOHSCROLL,25,116,480,30,101);
+        make(hwnd,L"BUTTON",L"Choose folder",BS_PUSHBUTTON,515,116,135,30,102);
+        g_status=make(hwnd,L"STATIC",L"Select the StandChillow installation folder to inspect it.",0,25,160,630,28,103);
+        g_plugins=make(hwnd,L"BUTTON",L"Open / create BepInEx plugins",BS_PUSHBUTTON,25,205,240,36,104);
+        g_open=make(hwnd,L"BUTTON",L"Open game folder",BS_PUSHBUTTON,280,205,180,36,105);
+        make(hwnd,L"STATIC",L"ACTIVITY LOG",0,25,265,200,20,0);
+        g_log=make(hwnd,L"EDIT",L"Ready. Select the StandChillow game root folder.\r\n",WS_BORDER|ES_MULTILINE|ES_AUTOVSCROLL|ES_READONLY|WS_VSCROLL,25,290,625,180,106);
+        for(HWND c=GetWindow(hwnd,GW_CHILD);c;c=GetWindow(c,GW_HWNDNEXT)) SendMessageW(c,WM_SETFONT,(WPARAM)font,TRUE);
+        return 0;
+    }
+    case WM_COMMAND:
+        switch(LOWORD(wp)) { case 102: chooseFolder(hwnd); break; case 104: openPlugins(); break; case 105: openGame(); break; }
+        return 0;
+    case WM_DESTROY: PostQuitMessage(0); return 0;
+    }
+    return DefWindowProcW(hwnd,msg,wp,lp);
+}
+int WINAPI wWinMain(HINSTANCE h,HINSTANCE,LPWSTR,int show) {
+    CoInitializeEx(nullptr,COINIT_APARTMENTTHREADED);
+    INITCOMMONCONTROLSEX ic{sizeof(ic),ICC_STANDARD_CLASSES}; InitCommonControlsEx(&ic);
+    WNDCLASSW wc{}; wc.lpfnWndProc=wndProc; wc.hInstance=h; wc.lpszClassName=kClass;
+    wc.hCursor=LoadCursor(nullptr,IDC_ARROW); wc.hbrBackground=(HBRUSH)(COLOR_WINDOW+1);
+    wc.hIcon=LoadIcon(nullptr,IDI_APPLICATION); RegisterClassW(&wc);
+    HWND w=CreateWindowExW(0,kClass,L"StarfallDreams — StandChillow Mod Manager",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
+        CW_USEDEFAULT,CW_USEDEFAULT,700,550,nullptr,nullptr,h,nullptr);
+    if(!w) return 1; ShowWindow(w,show); UpdateWindow(w);
+    MSG m; while(GetMessageW(&m,nullptr,0,0)>0){TranslateMessage(&m);DispatchMessageW(&m);}
+    CoUninitialize(); return (int)m.wParam;
+}
