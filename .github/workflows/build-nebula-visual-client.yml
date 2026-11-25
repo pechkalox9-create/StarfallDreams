@@ -1,0 +1,43 @@
+name: Build Nebula Visual Client
+
+on:
+  push:
+    branches:
+      - feature/nebula-visual-client
+    paths:
+      - "minecraft/nebula-visual-client/**"
+      - ".github/workflows/build-nebula-visual-client.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.2.1"
+
+      - name: Build Fabric mod
+        working-directory: minecraft/nebula-visual-client
+        run: gradle --no-daemon clean build
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: nebula-visual-client-fabric-mc-1.21.11
+          path: minecraft/nebula-visual-client/build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 30
