@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "starfall_explosions",
+  "version": "${version}",
+  "name": "Starfall Explosions",
+  "description": "A cosmic effects controller with client-side-only visual showcases.",
+  "authors": ["StarfallDreams"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.starfall.explosions.StarfallExplosions"],
+    "client": ["dev.starfall.explosions.client.StarfallExplosionsClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
