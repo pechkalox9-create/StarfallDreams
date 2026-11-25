@@ -1,6 +1,6 @@
 # Starfall Explosions (Fabric)
 
-A standalone Fabric mod module for **Minecraft Java 1.21.11**.
+A standalone Fabric mod module for **Minecraft Java 1.21.11**. The build uses Fabric Loom's remapping plugin, which is required for obfuscated Minecraft versions through 1.21.11.
 
 ## Features
 
