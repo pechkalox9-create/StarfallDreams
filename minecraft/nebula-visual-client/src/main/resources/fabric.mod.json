@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "nebula_visuals",
+  "version": "${version}",
+  "name": "Nebula Visual Client",
+  "description": "A customizable, client-side visual HUD and menu for Minecraft 1.21.11.",
+  "authors": ["StarfallDreams"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.nebula.visuals.NebulaVisualsClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
