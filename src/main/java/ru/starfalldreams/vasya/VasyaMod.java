@@ -51,7 +51,7 @@ public class VasyaMod implements ModInitializer {
             dispatcher.register(literal("vasya")
                 .executes(ctx -> {
                     ServerPlayerEntity player = ctx.getSource().getPlayerOrThrow();
-                    CatEntity cat = EntityType.CAT.create(player.getWorld(), SpawnReason.TRIGGERED);
+                    CatEntity cat = EntityType.CAT.create(player.getEntityWorld(), SpawnReason.TRIGGERED);
                     if (cat == null) return 0;
                     BlockPos p = player.getBlockPos().add(1, 0, 1);
                     cat.refreshPositionAndAngles(p, player.getYaw(), 0);
@@ -59,7 +59,7 @@ public class VasyaMod implements ModInitializer {
                     cat.setCustomNameVisible(true);
                     cat.setTamed(true, true);
                     cat.setOwner(player);
-                    player.getWorld().spawnEntity(cat);
+                    player.getEntityWorld().spawnEntity(cat);
                     player.sendMessage(Text.literal("§aВася появился! Он будет наблюдать за твоими действиями и учиться."), false);
                     return 1;
                 })
