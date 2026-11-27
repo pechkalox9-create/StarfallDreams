@@ -3,6 +3,7 @@ package ru.starfalldreams.vasya;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.entity.EntityType;
@@ -28,6 +29,13 @@ public class VasyaMod implements ModInitializer {
             String skill = classifyBrokenBlock(block);
             if (skill != null) notifyLearning(serverPlayer,
                 VasyaProgress.observe(serverPlayer, skill, humanName(block)), skill);
+        });
+
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) -> {
+            if (entity instanceof ServerPlayerEntity player) {
+                notifyLearning(player, VasyaProgress.observe(player, "defense", "опасность и получение урона"), "defense");
+            }
+            return true;
         });
 
         UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
