@@ -1,43 +1,16 @@
-# StarfallDreams — StandChillow DLL Loader
+# Вася — Learning Cat
 
-A Windows GUI utility designed to run under Wine on Linux. It provides a DLL-selection workflow for StandChillow Unity plugins.
+Fabric-мод для Minecraft Java 1.21.11. Вася — приручаемый кот-компаньон, который учится вместе с игроком.
 
-## Features
-- Select the StandChillow installation folder and detect its executable.
-- Detect a Unity Mono or IL2CPP data folder.
-- Select a plugin DLL and copy it into `BepInEx/plugins`.
-- List and remove staged plugin DLLs.
-- Launch StandChillow and check whether its process is running.
-- Activity log for all operations.
+## Сборка
+- Java 21
+- Gradle Wrapper (добавить локально командой `gradle wrapper`)
+- `gradle build`
 
-## Important: how DLL loading works
+## Управление
+- `/vasya` — призвать Васю рядом с собой
+- `R` — открыть вопросы и реплики
+- `K` — открыть навыки
 
-This utility stages Unity plugin DLLs in BepInEx's plugin directory. A compatible BepInEx installation must already be installed and configured for the game's Unity runtime and architecture. BepInEx then loads compatible plugins when the game starts.
-
-**This is not a remote-process injector:** it does not inject arbitrary DLLs into a running process, modify game memory, or bypass anti-cheat/security controls. A random Windows DLL is not necessarily a Unity plugin; it must be built for the game's runtime and plugin API.
-
-## Build
-
-Requires CMake 3.20+ and Visual Studio 2022 (x64):
-
-```powershell
-cmake -S . -B build -A x64
-cmake --build build --config Release
-```
-
-Output: `build/Release/StarfallDreams.exe`.
-
-## Run under Wine
-
-```bash
-wine StarfallDreams.exe
-```
-
-Use the same Wine prefix for the utility and StandChillow if you want the game paths and installed components to match.
-
-## Runtime detection
-
-- `*_Data/Managed` usually indicates Unity Mono.
-- `*_Data/il2cpp_data` usually indicates Unity IL2CPP.
-
-Install the corresponding BepInEx distribution. Detection is a heuristic and does not establish compatibility by itself.
+## Текущая основа
+MVP: призыв кота, клавиши, диалоговое меню, учёт опыта за добычу блоков и улучшение навыков. Поведение обучения, сохранение прогресса в мире и собственная модель/текстура Васи отмечены как следующие этапы.

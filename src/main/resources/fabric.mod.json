@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "vasya",
+  "version": "${version}",
+  "name": "Vasya - Learning Cat",
+  "description": "A cat companion who learns alongside the player.",
+  "authors": ["StarfallDreams"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["ru.starfalldreams.vasya.VasyaMod"],
+    "client": ["ru.starfalldreams.vasya.VasyaClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
