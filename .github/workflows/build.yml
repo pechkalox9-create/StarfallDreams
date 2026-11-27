@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: vasya-mod-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,8 +31,23 @@ jobs:
         with:
           gradle-version: '9.2.1'
 
-      - name: Build mod
-        run: gradle --no-daemon clean build
+      - name: Build mod (retry transient repository errors)
+        shell: bash
+        run: |
+          set +e
+          for attempt in 1 2 3; do
+            echo "Build attempt ${attempt}/3"
+            gradle --no-daemon clean build
+            result=$?
+            if [ "$result" -eq 0 ]; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "Build failed; waiting before retry in case Maven Central is rate-limiting requests."
+              sleep $((attempt * 30))
+            fi
+          done
+          exit "$result"
 
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
